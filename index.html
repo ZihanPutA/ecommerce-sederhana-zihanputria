@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SILLAGE — Maison de Parfum</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+
+  <!-- Google Analytics (Dummy) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+    // Metrik yang dipantau:
+    // - bounce_rate: % pengunjung yang langsung keluar
+    // - session_duration: durasi rata-rata kunjungan
+    // - add_to_cart: event saat produk ditambahkan ke keranjang
+    // - begin_checkout: event saat pengguna mulai checkout
+    // - purchase: event saat transaksi selesai
+    // - product_view: event saat detail produk dilihat
+    // - search: event pencarian produk
+    // - conversion_rate: rasio pengunjung → pembeli
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ─── NAVBAR ─── -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">SILL<span>A</span>GE</a>
+    <ul class="nav-links">
+      <li><a href="#catalog" onclick="scrollTo('#catalog')">Koleksi</a></li>
+      <li><a href="#brand">Tentang Kami</a></li>
+      <li><a href="#checkout" onclick="openCheckout()">Checkout</a></li>
+      <li><a href="#analytics-note">Analytics</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="admin-link" onclick="openAdminEntry()">Admin</button>
+      <button class="cart-btn" onclick="openCart()">
+        Keranjang
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#catalog" onclick="closeMenu(); smoothScrollTo('#catalog')">Koleksi</a>
+    <a href="#brand" onclick="closeMenu()">Tentang Kami</a>
+    <a href="#" onclick="closeMenu(); openCart()">Keranjang</a>
+    <a href="#analytics-note" onclick="closeMenu()">Analytics</a>
+  </div>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <canvas class="smoke-canvas" id="smokeCanvas"></canvas>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Maison de Parfum Artisanal</p>
+      <h1 class="hero-title">Jejak yang <em>Tak Terlupakan</em></h1>
+      <p class="hero-sub">Koleksi wewangian eksklusif yang lahir dari bahan-bahan langka pilihan dunia — setiap tetes
+        menceritakan kisahnya sendiri.</p>
+      <div class="hero-cta">
+        <a href="#catalog" class="btn-primary" onclick="smoothScrollTo('#catalog'); return false;">Jelajahi Koleksi</a>
+        <a href="#brand" class="btn-outline">Tentang Kami</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Gulir</span>
+    </div>
+  </section>
+
+  <!-- ─── CATALOG ─── -->
+  <section id="catalog">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Koleksi Eksklusif</p>
+      <h2 class="section-title">Wewangian <em>Pilihan</em></h2>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar reveal">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="Cari parfum..." oninput="filterProducts()">
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" data-cat="all" onclick="setCategory(this, 'all')">Semua</button>
+        <button class="chip" data-cat="floral" onclick="setCategory(this, 'floral')">Floral</button>
+        <button class="chip" data-cat="woody" onclick="setCategory(this, 'woody')">Woody</button>
+        <button class="chip" data-cat="oriental" onclick="setCategory(this, 'oriental')">Oriental</button>
+        <button class="chip" data-cat="fresh" onclick="setCategory(this, 'fresh')">Fresh</button>
+      </div>
+      <div class="price-filter">
+        <span>Harga:</span>
+        <select onchange="filterProducts()" id="priceFilter">
+          <option value="all">Semua</option>
+          <option value="low">Rp 0 – 500rb</option>
+          <option value="mid">Rp 500rb – 1jt</option>
+          <option value="high">Rp 1jt+</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <!-- ─── BRAND ─── -->
+  <section id="brand">
+    <div class="brand-grid brand-grid-text-only">
+      <div class="brand-text reveal">
+        <p class="section-eyebrow">Kisah Kami</p>
+        <h2 class="section-title" style="margin-bottom:1.5rem">Diciptakan dengan <em>Dedikasi</em></h2>
+        <p>SILLAGE lahir dari keyakinan bahwa wewangian adalah bentuk seni tertinggi — tak kasat mata, namun
+          meninggalkan kesan abadi. Kami bekerja bersama para maestro parfumer dari Grasse, Perancis, dan mengkurasi
+          bahan-bahan langka dari seluruh penjuru dunia.</p>
+        <p>Setiap botol SILLAGE adalah buah dari ratusan jam eksperimen, penyempurnaan, dan hasrat yang tulus terhadap
+          keindahan aromatis.</p>
+        <div class="brand-stats">
+          <div class="brand-stat reveal">
+            <div class="stat-num">47</div>
+            <div class="stat-label">Formulasi Eksklusif</div>
+          </div>
+          <div class="brand-stat reveal">
+            <div class="stat-num">12</div>
+            <div class="stat-label">Negara Asal Bahan</div>
+          </div>
+          <div class="brand-stat reveal">
+            <div class="stat-num">8</div>
+            <div class="stat-label">Tahun Pengalaman</div>
+          </div>
+          <div class="brand-stat reveal">
+            <div class="stat-num">28k+</div>
+            <div class="stat-label">Pelanggan Setia</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CHECKOUT ─── -->
+  <section id="checkout">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Selesaikan Pesanan</p>
+      <h2 class="section-title">Informasi <em>Pengiriman</em></h2>
+    </div>
+    <div class="checkout-grid">
+      <div class="form-section">
+        <!-- Kontak -->
+        <div class="form-title">Informasi Kontak</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nama Depan</label>
+            <input type="text" id="firstName" placeholder="Budi">
+          </div>
+          <div class="form-group">
+            <label>Nama Belakang</label>
+            <input type="text" id="lastName" placeholder="Santoso">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="budi@email.com">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Nomor Telepon</label>
+            <input type="tel" id="phone" placeholder="+62 812 3456 7890">
+          </div>
+        </div>
+
+        <!-- Pengiriman -->
+        <div class="form-title" style="margin-top:2rem">Alamat Pengiriman</div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Alamat Lengkap</label>
+            <input type="text" id="address" placeholder="Jl. Melati No. 12">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kota</label>
+            <input type="text" id="city" placeholder="Jakarta">
+          </div>
+          <div class="form-group">
+            <label>Kode Pos</label>
+            <input type="text" id="postal" placeholder="12345">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Provinsi</label>
+            <select id="province">
+              <option value="">Pilih Provinsi</option>
+              <option>DKI Jakarta</option>
+              <option>Jawa Barat</option>
+              <option>Jawa Tengah</option>
+              <option>Jawa Timur</option>
+              <option>Banten</option>
+              <option>Bali</option>
+              <option>Sumatera Utara</option>
+              <option>Sulawesi Selatan</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Pembayaran -->
+        <div class="form-title" style="margin-top:2rem">Metode Pembayaran</div>
+        <div class="payment-methods" id="paymentMethods">
+          <label class="pay-option selected" onclick="selectPayment(this)">
+            <input type="radio" name="payment" value="card" checked>
+            <span class="pay-name">Kartu Kredit / Debit</span>
+            <div class="pay-icons">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=VISA&font=roboto" alt="Visa">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=PayPal&font=roboto" alt="PayPal">
+            </div>
+          </label>
+          <label class="pay-option" onclick="selectPayment(this)">
+            <input type="radio" name="payment" value="transfer">
+            <span class="pay-name">Transfer Bank</span>
+            <div class="pay-icons">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=BCA&font=roboto" alt="BCA">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=BNI&font=roboto" alt="BNI">
+            </div>
+          </label>
+          <label class="pay-option" onclick="selectPayment(this)">
+            <input type="radio" name="payment" value="ewallet">
+            <span class="pay-name">E-Wallet</span>
+            <div class="pay-icons">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=OVO&font=roboto" alt="OVO">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=GoPay&font=roboto" alt="GoPay">
+            </div>
+          </label>
+          <label class="pay-option" onclick="selectPayment(this)">
+            <input type="radio" name="payment" value="cod">
+            <span class="pay-name">Bayar di Tempat (COD)</span>
+            <div class="pay-icons">
+              <img class="pay-icon-img" src="https://placehold.co/56x28/141414/E8D5B0?text=COD&font=roboto" alt="COD">
+            </div>
+          </label>
+        </div>
+
+        <!-- Card Fields -->
+        <div id="cardFields" class="card-fields">
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Nomor Kartu</label>
+              <input type="text" id="cardNum" placeholder="1234 5678 9012 3456" maxlength="19"
+                oninput="formatCard(this)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Berlaku Hingga</label>
+              <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+            </div>
+            <div class="form-group">
+              <label>CVV</label>
+              <input type="text" id="cvv" placeholder="123" maxlength="3">
+            </div>
+          </div>
+        </div>
+
+        <button class="submit-order-btn" onclick="submitOrder()">
+          Konfirmasi Pesanan →
+        </button>
+      </div>
+
+      <!-- Order Summary -->
+      <div>
+        <div class="order-summary-box reveal">
+          <div class="summary-title">Ringkasan Pesanan</div>
+          <div class="summary-items" id="summaryItems"></div>
+          <div class="summary-line">
+            <span class="label">Subtotal</span>
+            <span id="summarySubtotal">Rp 0</span>
+          </div>
+          <div class="summary-line">
+            <span class="label">Pengiriman</span>
+            <span>Rp 25.000</span>
+          </div>
+          <div class="summary-line">
+            <span class="label">Pajak (11%)</span>
+            <span id="summaryTax">Rp 0</span>
+          </div>
+          <div class="summary-total">
+            <span class="label">Total</span>
+            <span class="val" id="summaryTotal">Rp 0</span>
+          </div>
+          <div class="trust-badges">
+            <div class="trust-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Pembayaran 100% Aman & Terenkripsi
+            </div>
+            <div class="trust-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+              Gratis Ongkir untuk pembelian Rp 500rb+
+            </div>
+            <div class="trust-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Garansi 30 hari uang kembali
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ANALYTICS NOTE ─── -->
+  <section id="analytics-note">
+    <div class="analytics-badge">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--sage)">
+        <circle cx="5" cy="5" r="4" />
+      </svg>
+      Google Analytics Integration
+    </div>
+    <h3
+      style="font-family:'Cormorant Garamond',serif; font-size:1.3rem; color:var(--champagne); font-weight:300; margin-bottom:1.5rem;">
+      Metrik yang Dipantau
+    </h3>
+    <div class="analytics-grid">
+      <div class="metric-card reveal">
+        <div class="metric-icon">📉</div>
+        <div class="metric-name">Bounce Rate</div>
+        <div class="metric-desc">Persentase pengunjung yang meninggalkan situs setelah melihat satu halaman. Target
+          &lt;40%.</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-icon">⏱</div>
+        <div class="metric-name">Session Duration</div>
+        <div class="metric-desc">Rata-rata durasi kunjungan per sesi. Semakin lama, semakin tinggi engagement pengguna.
+        </div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-icon">🛒</div>
+        <div class="metric-name">Add to Cart Rate</div>
+        <div class="metric-desc">Rasio pengunjung yang menambahkan produk ke keranjang. Indikator minat pembelian.</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-icon">💳</div>
+        <div class="metric-name">Conversion Rate</div>
+        <div class="metric-desc">Rasio pengunjung yang menyelesaikan pembelian. Metrik utama keberhasilan bisnis.</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-icon">🔍</div>
+        <div class="metric-name">Search Events</div>
+        <div class="metric-desc">Kata kunci yang sering dicari pengguna untuk menemukan produk yang tepat.</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-icon">📦</div>
+        <div class="metric-name">Product View Events</div>
+        <div class="metric-desc">Produk yang paling banyak dilihat untuk memahami preferensi pelanggan.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">SILL<span>A</span>GE</a>
+        <p class="footer-desc">Wewangian artisanal yang terinspirasi dari kekayaan alam dan budaya dunia — diciptakan
+          untuk jiwa yang menghargai keindahan.</p>
+        <div class="footer-social">
+          <a href="#" class="social-link" title="Instagram">IG</a>
+          <a href="#" class="social-link" title="TikTok">TK</a>
+          <a href="#" class="social-link" title="Pinterest">PT</a>
+          <a href="#" class="social-link" title="Twitter/X">𝕏</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Koleksi</h4>
+        <ul>
+          <li><a href="#">Floral</a></li>
+          <li><a href="#">Woody & Earthy</a></li>
+          <li><a href="#">Oriental & Spicy</a></li>
+          <li><a href="#">Fresh & Citrus</a></li>
+          <li><a href="#">Edisi Terbatas</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Layanan</h4>
+        <ul>
+          <li><a href="#">Kebijakan Pengembalian</a></li>
+          <li><a href="#">Lacak Pesanan</a></li>
+          <li><a href="#">Panduan Aroma</a></li>
+          <li><a href="#">Program Loyalitas</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Newsletter</h4>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.75rem;line-height:1.7;">Dapatkan informasi
+          koleksi terbaru dan penawaran eksklusif.</p>
+        <div class="newsletter-form">
+          <input type="email" placeholder="email@anda.com">
+          <button>→</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 SILLAGE Maison de Parfum. Seluruh hak cipta dilindungi.</span>
+      <div class="footer-legal">
+        <a href="#">Kebijakan Privasi</a>
+        <a href="#">Syarat & Ketentuan</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── PRODUCT MODAL ─── -->
+  <div class="modal-overlay" id="productModal" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-inner">
+        <div class="modal-image" id="modalImage"></div>
+        <div class="modal-body">
+          <div class="modal-close-x">
+            <div class="modal-category" id="modalCategory"></div>
+            <button class="close-x-btn" onclick="closeModalDirect()">✕</button>
+          </div>
+          <div class="modal-name" id="modalName"></div>
+          <div class="modal-house" id="modalHouse"></div>
+          <div class="modal-price-row">
+            <span class="modal-price" id="modalPrice"></span>
+            <span class="modal-old-price" id="modalOldPrice"></span>
+          </div>
+          <div class="modal-desc" id="modalDesc"></div>
+          <div class="notes-section">
+            <div class="notes-label">Piramida Aroma</div>
+            <div class="notes-row">
+              <div class="note-group">
+                <div class="note-type">Top</div>
+                <div class="note-value" id="noteTop"></div>
+              </div>
+              <div class="note-group">
+                <div class="note-type">Heart</div>
+                <div class="note-value" id="noteHeart"></div>
+              </div>
+              <div class="note-group">
+                <div class="note-type">Base</div>
+                <div class="note-value" id="noteBase"></div>
+              </div>
+            </div>
+          </div>
+          <div class="volume-selector">
+            <div class="volume-label">Ukuran</div>
+            <div class="volume-options" id="volumeOptions"></div>
+          </div>
+          <div class="qty-row">
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="changeQty(-1)">−</button>
+              <input class="qty-num" type="number" id="modalQty" value="1" min="1" readonly>
+              <button class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+            <span id="modalStock" style="font-size:0.78rem;"></span>
+          </div>
+          <button class="modal-add-btn" onclick="addFromModal()">Tambah ke Keranjang</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CART DRAWER ─── -->
+  <div class="overlay-tint" id="overlayTint" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <span class="drawer-title">Keranjang Belanja</span>
+      <button class="drawer-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="drawer-footer">
+      <div class="subtotal-row">
+        <span class="subtotal-label">Subtotal</span>
+        <span class="subtotal-val" id="cartTotal">Rp 0</span>
+      </div>
+      <p class="shipping-note">Ongkos kirim dihitung saat checkout</p>
+      <button class="checkout-btn" onclick="goCheckout()">Lanjut ke Checkout →</button>
+      <button class="continue-btn" onclick="closeCart()">← Lanjut Belanja</button>
+    </div>
+  </div>
+
+  <!-- ─── SUCCESS MODAL ─── -->
+  <div class="success-modal" id="successModal">
+    <div class="success-box">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Pesanan Dikonfirmasi</div>
+      <div class="order-id" id="orderId"></div>
+      <div class="success-sub">
+        Terima kasih telah berbelanja di SILLAGE. Konfirmasi pesanan akan dikirimkan ke email Anda dalam beberapa menit.
+        Wewangian Anda akan tiba dalam 2–4 hari kerja.
+      </div>
+      <button class="btn-primary" onclick="closeSuccess()">Kembali Berbelanja</button>
+    </div>
+  </div>
+
+  <!-- ─── ADMIN STOCK PANEL MODAL ─── -->
+  <div class="modal-overlay admin-panel" id="adminPanelModal" onclick="closeAdminPanelOverlay(event)">
+    <div class="modal">
+      <div class="admin-modal-body">
+        <div class="admin-header">
+          <span class="admin-title">Kelola Stok Produk</span>
+          <button class="admin-close" onclick="closeAdminPanel()">✕</button>
+        </div>
+        <div class="stock-table" id="stockTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
